@@ -74,10 +74,10 @@ def home():
                 )
 
     return render_template(
-        "index.html",
-        audio_file=audio_file,
-        error=error
-    )
+    "../index.html",
+    audio_file=audio_file,
+    error=error
+)
 
 
 @app.route("/audio/<filename>")
