@@ -1,0 +1,288 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Hindi Text to Audio</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #e0e7ff, #fce7f3);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            width: 100%;
+            max-width: 650px;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.12);
+        }
+
+        h1 {
+            text-align: center;
+            color: #4338ca;
+            margin-top: 0;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin: 18px 0 8px;
+            color: #333;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 180px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            font-size: 16px;
+            resize: vertical;
+            font-family: Arial, sans-serif;
+        }
+
+        textarea:focus,
+        select:focus {
+            outline: 2px solid #818cf8;
+            border-color: #4f46e5;
+        }
+
+        select,
+        input[type="range"] {
+            width: 100%;
+        }
+
+        select {
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+        }
+
+        .speed-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+        }
+
+        input[type="range"] {
+            cursor: pointer;
+            margin-top: 12px;
+        }
+
+        button,
+        .download-btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            margin-top: 22px;
+            border: none;
+            border-radius: 10px;
+            background: #4f46e5;
+            color: white;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        button:hover,
+        .download-btn:hover {
+            background: #3730a3;
+        }
+
+        button:disabled {
+            background: #9ca3af;
+            cursor: wait;
+        }
+
+        .result {
+            margin-top: 25px;
+            padding: 18px;
+            background: #f0fdf4;
+            border-radius: 12px;
+            overflow-wrap: anywhere;
+        }
+
+        .result h3 {
+            color: #166534;
+            margin-top: 0;
+        }
+
+        audio {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .error {
+            margin-top: 20px;
+            padding: 12px;
+            background: #fee2e2;
+            color: #991b1b;
+            border-radius: 8px;
+            overflow-wrap: anywhere;
+        }
+
+        .note {
+            color: #777;
+            font-size: 13px;
+            text-align: center;
+            margin-top: 20px;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>🎙️ Hindi Text to Audio</h1>
+
+    <p class="subtitle">
+        Apna Hindi ya Hinglish text likho aur MP3 audio banao!
+    </p>
+
+    <form method="POST" id="audioForm">
+
+        <label for="text">Apna Text Likho</label>
+
+        <textarea
+            id="text"
+            name="text"
+            maxlength="10000"
+            placeholder="Yahan apna Hindi ya Hinglish text likho..."
+            required
+        ></textarea>
+
+        <label for="voice">Voice Select Karo</label>
+
+        <select name="voice" id="voice">
+            <option value="male">Male Voice - Madhur</option>
+            <option value="female">Female Voice - Swara</option>
+        </select>
+
+        <label for="speed">Speaking Speed</label>
+
+        <div class="speed-info">
+            <span>Slow</span>
+            <strong id="speedValue">0%</strong>
+            <span>Fast</span>
+        </div>
+
+        <input
+            type="range"
+            id="speed"
+            name="speed"
+            min="-50"
+            max="50"
+            value="0"
+            step="5"
+        >
+
+        <button type="submit" id="generateBtn">
+            🔊 Generate Audio
+        </button>
+
+    </form>
+
+    {% if audio_file %}
+        <div class="result">
+
+            <h3>✅ Tumhari Audio Ready Hai!</h3>
+
+            <p>Audio sunne ke liye Play button dabao.</p>
+
+            <audio controls preload="none">
+                <source
+                    src="{{ url_for('serve_audio', filename=audio_file) }}"
+                    type="audio/mpeg"
+                >
+                Tumhara browser audio playback support nahi karta.
+            </audio>
+
+            <a
+                class="download-btn"
+                href="{{ url_for('download', filename=audio_file) }}"
+            >
+                ⬇️ Download MP3
+            </a>
+
+        </div>
+    {% endif %}
+
+    {% if error %}
+        <div class="error" role="alert">
+            {{ error }}
+        </div>
+    {% endif %}
+
+    <p class="note">
+        Audio generate karne ke liye internet connection zaroori hai.
+        Audio generation ke liye online voice service use hoti hai.
+    </p>
+
+</div>
+
+<script>
+    const speedSlider = document.getElementById("speed");
+    const speedValue = document.getElementById("speedValue");
+    const audioForm = document.getElementById("audioForm");
+    const generateBtn = document.getElementById("generateBtn");
+
+    function updateSpeed() {
+        const value = Number(speedSlider.value);
+
+        speedValue.textContent =
+            (value > 0 ? "+" : "") + value + "%";
+    }
+
+    speedSlider.addEventListener("input", updateSpeed);
+
+    audioForm.addEventListener("submit", function () {
+        if (audioForm.checkValidity()) {
+            generateBtn.disabled = true;
+            generateBtn.textContent = "⏳ Audio Generate Ho Rahi Hai...";
+        }
+    });
+
+    updateSpeed();
+</script>
+
+</body>
+</html>
+```
