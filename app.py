@@ -1,14 +1,27 @@
+```python
 from flask import Flask, render_template, request, send_file, send_from_directory
 import edge_tts
 import asyncio
 import os
 import uuid
 
-app = Flask(__name__, template_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), "templates"))
+# Project folder ka absolute path
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-OUTPUT_FOLDER = "audio"
+# Templates aur audio folders ke absolute paths
+TEMPLATE_FOLDER = os.path.join(BASE_DIR, "templates")
+OUTPUT_FOLDER = os.path.join(BASE_DIR, "audio")
+
+# Audio folder nahi hai to automatically create hoga
 os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 
+# Flask application
+app = Flask(
+    __name__,
+    template_folder=TEMPLATE_FOLDER
+)
+
+# Hindi voices
 VOICES = {
     "male": "hi-IN-MadhurNeural",
     "female": "hi-IN-SwaraNeural"
@@ -54,8 +67,12 @@ def home():
 
                 audio_file = filename
 
-            except Exception as e:
-                error = f"Audio generate nahi hua: {e}"
+            except Exception:
+                app.logger.exception("Audio generation failed")
+                error = (
+                    "Audio generate nahi hua. "
+                    "Internet connection check karke dobara try karo."
+                )
 
     return render_template(
         "index.html",
@@ -101,4 +118,5 @@ def download(filename):
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=False)
+```
