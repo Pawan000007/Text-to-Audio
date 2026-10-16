@@ -1,4 +1,3 @@
-```python
 from flask import Flask, render_template, request, send_file, send_from_directory
 import edge_tts
 import asyncio
@@ -119,4 +118,3 @@ def download(filename):
 
 if __name__ == "__main__":
     app.run(debug=False)
-```
