@@ -4,7 +4,7 @@ import asyncio
 import os
 import uuid
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), "templates"))
 
 OUTPUT_FOLDER = "audio"
 os.makedirs(OUTPUT_FOLDER, exist_ok=True)
